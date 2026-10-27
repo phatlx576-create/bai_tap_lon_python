@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talky</title>
+<link rel="icon" href="logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script>if (localStorage.getItem("talky-theme") === "dark") document.documentElement.classList.add("dark");</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {brand: "#4f46e5"}, fontFamily: {sans: ["Inter", "system-ui", "sans-serif"]}}}}</script>
+<style type="text/tailwindcss">
+  .inp {@apply w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent outline-none focus:border-brand}
+  .ibtn {@apply w-9 h-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800}
+</style>
+<style>
+  @keyframes pop {from {opacity: 0; transform: translateY(8px) scale(.96)}}
+  @keyframes dot {0%, 60%, 100% {opacity: .3} 30% {opacity: 1}}
+  .pop {animation: pop .2s ease-out}
+  .dots i {width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: dot 1.2s infinite}
+  .dots i:nth-child(2) {animation-delay: .2s}
+  .dots i:nth-child(3) {animation-delay: .4s}
+  #chat {display: none}
+  #app.open #chat {display: flex}
+  #app.open #side {display: none}
+  @media (min-width: 768px) {#chat {display: flex} #app.open #side {display: flex}}
+  @media (prefers-reduced-motion: reduce) {.pop, .dots i {animation: none}}
+</style>
+</head>
+<body class="font-sans bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+
+<div id="auth" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+    <div class="flex flex-col items-center mb-5">
+      <img src="logo.svg" class="w-14 h-14" alt="Logo Talky">
+      <h1 class="text-2xl font-medium mt-2">Talky</h1>
+      <p class="text-sm text-slate-500">Trò chuyện cùng bạn bè</p>
+    </div>
+    <div class="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 mb-4 text-sm">
+      <button type="button" id="tab-login"></button>
+      <button type="button" id="tab-register"></button>
+    </div>
+    <form id="auth-form" class="space-y-3">
+      <input id="name" class="inp hidden" placeholder="Tên hiển thị" maxlength="50">
+      <input id="username" class="inp" placeholder="Tên đăng nhập" autocomplete="username" required>
+      <input id="password" type="password" class="inp" placeholder="Mật khẩu (từ 6 ký tự)" autocomplete="current-password" required>
+      <p id="auth-err" class="text-sm text-red-500 min-h-[1.25rem]"></p>
+      <button id="auth-btn" class="w-full py-2.5 rounded-lg bg-brand text-white font-medium"></button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="hidden" style="height:100dvh">
+  <aside id="side" class="w-full md:w-80 shrink-0 flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div class="flex items-center gap-2 p-4">
+      <img src="logo.svg" class="w-8 h-8" alt="">
+      <span class="text-lg font-medium">Talky</span>
+      <div class="ml-auto flex gap-1">
+        <button id="new-group" class="ibtn" title="Tạo nhóm chat">👥</button>
+        <button id="theme" class="ibtn" title="Đổi sáng/tối">🌙</button>
+        <button id="logout" class="ibtn" title="Đăng xuất">🚪</button>
+      </div>
+    </div>
+    <div class="px-4 relative">
+      <input id="search" class="inp" placeholder="Tìm bạn theo tên hoặc username" autocomplete="off">
+      <div id="results" class="hidden absolute left-4 right-4 top-12 z-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg max-h-64 overflow-auto"></div>
+    </div>
+    <div id="reqs"></div>
+    <div id="list" class="flex-1 overflow-auto mt-2"></div>
+    <div id="me" class="flex items-center gap-3 p-3 border-t border-slate-200 dark:border-slate-800"></div>
+  </aside>
+
+  <main id="chat" class="flex-1 min-w-0 flex-col">
+    <div id="empty" class="m-auto text-center text-slate-400 p-6">
+      <img src="logo.svg" class="w-16 h-16 mx-auto opacity-50" alt="">
+      <p class="mt-3">Chọn một người bạn để bắt đầu trò chuyện</p>
+    </div>
+    <div id="panel" class="hidden flex-1 min-h-0 flex-col">
+      <div class="flex items-center gap-2 px-3 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <button id="back" class="ibtn md:hidden" title="Quay lại">←</button>
+        <div id="head" class="flex items-center gap-3"></div>
+      </div>
+      <div id="msgs" class="flex-1 overflow-auto px-4 py-3"></div>
+      <div class="relative p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2">
+        <div id="emojis" class="hidden absolute bottom-16 left-3 grid grid-cols-8 gap-1 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg"></div>
+        <button id="emoji-btn" type="button" class="ibtn text-xl" title="Biểu tượng cảm xúc">😊</button>
+        <button id="img-btn" type="button" class="ibtn text-xl" title="Gửi ảnh">🖼️</button>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden">
+        <input id="text" class="inp !rounded-full" placeholder="Nhập tin nhắn" autocomplete="off">
+        <button id="send" class="w-10 h-10 shrink-0 rounded-full bg-brand text-white" title="Gửi">➤</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="gdlg" class="m-auto w-full max-w-sm rounded-2xl p-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700">
+  <h2 class="text-lg font-medium mb-3">Tạo nhóm chat</h2>
+  <form id="gform" class="space-y-3">
+    <input id="gname" class="inp" placeholder="Tên nhóm" maxlength="50" required>
+    <div id="gfriends" class="max-h-48 overflow-auto"></div>
+    <p id="gerr" class="text-sm text-red-500 min-h-[1.25rem]"></p>
+    <div class="flex justify-end gap-2">
+      <button type="button" id="gcancel" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800">Hủy</button>
+      <button class="px-3 py-2 rounded-lg bg-brand text-white">Tạo nhóm</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
