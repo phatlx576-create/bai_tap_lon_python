@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SecureChat - Chat mã hóa đầu cuối</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========== MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ========== -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="logo">🔒</div>
+      <h1>SecureChat</h1>
+      <p class="subtitle">Chat mã hóa đầu cuối (ECDH + AES-GCM)</p>
+
+      <div class="tabs">
+        <button type="button" id="tab-login" class="tab active">Đăng nhập</button>
+        <button type="button" id="tab-register" class="tab">Đăng ký</button>
+      </div>
+
+      <form id="auth-form" autocomplete="off">
+        <label for="auth-username">Tên đăng nhập</label>
+        <input id="auth-username" type="text" placeholder="vd: nguyenvana" required>
+
+        <label for="auth-password">Mật khẩu</label>
+        <input id="auth-password" type="password" placeholder="Ít nhất 6 ký tự" required>
+
+        <div id="confirm-wrap" class="hidden">
+          <label for="auth-confirm">Nhập lại mật khẩu</label>
+          <input id="auth-confirm" type="password" placeholder="Nhập lại mật khẩu ở trên">
+        </div>
+
+        <div id="auth-error" class="error hidden"></div>
+        <button id="auth-submit" type="submit" class="btn btn-primary">Đăng nhập</button>
+      </form>
+
+      <p class="note">Khóa bí mật được tạo và lưu ngay trên trình duyệt của bạn. Server không bao giờ nhìn thấy nó.</p>
+    </div>
+  </div>
+
+  <!-- ========== MÀN HÌNH CHAT ========== -->
+  <div id="chat-screen" class="chat-screen hidden">
+
+    <!-- Cột trái -->
+    <aside id="sidebar" class="sidebar">
+      <div class="me-bar">
+        <div class="avatar" id="me-avatar">?</div>
+        <div class="me-info">
+          <strong id="me-name">...</strong>
+          <span class="me-sub">🔒 Đã bật mã hóa đầu cuối</span>
+        </div>
+        <button type="button" id="logout-btn" class="btn btn-small btn-ghost">Thoát</button>
+      </div>
+
+      <div class="search-box">
+        <input id="search-input" type="search" placeholder="Tìm người dùng để kết bạn...">
+      </div>
+      <div id="search-results" class="list"></div>
+
+      <div id="requests-section" class="section hidden">
+        <h3>Lời mời kết bạn <span id="requests-count" class="badge">0</span></h3>
+        <div id="requests-list" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h3>Bạn bè</h3>
+        <div id="friends-list" class="list">
+          <div class="empty-hint">Chưa có bạn bè. Hãy tìm và kết bạn ở ô phía trên.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Khung chat -->
+    <main id="chat-main" class="chat-main">
+      <div id="chat-empty" class="chat-empty">
+        <div class="logo">💬</div>
+        <p>Chọn một người bạn để bắt đầu trò chuyện.</p>
+      </div>
+
+      <div id="chat-panel" class="chat-panel hidden">
+        <header class="chat-header">
+          <button type="button" id="back-btn" class="btn btn-small btn-ghost back-btn">←</button>
+          <div class="avatar" id="chat-avatar">?</div>
+          <div class="chat-title-wrap">
+            <strong id="chat-title">...</strong>
+            <span id="chat-status" class="chat-status">Offline</span>
+          </div>
+          <div id="chat-fingerprint" class="fingerprint" title="Mã xác minh khóa. So sánh với bạn bè để chắc chắn không bị nghe lén."></div>
+        </header>
+
+        <div id="messages" class="messages">
+          <button type="button" id="load-more" class="btn btn-small btn-ghost hidden">Tải tin cũ hơn</button>
+        </div>
+
+        <form id="message-form" class="message-form" autocomplete="off">
+          <input id="message-input" type="text" placeholder="Nhập tin nhắn (sẽ được mã hóa)..." maxlength="2000">
+          <button id="send-btn" type="submit" class="btn btn-primary">Gửi</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

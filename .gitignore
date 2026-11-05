@@ -1,6 +1,9 @@
-venv/
 __pycache__/
 *.pyc
-instance/
-backend/static/uploads/
+venv/
+.venv/
+*.db
+*.sqlite3
 .env
+.idea/
+.vscode/
