@@ -1,1 +1,0 @@
-window.TAM_API = "";

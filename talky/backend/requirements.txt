@@ -1,5 +1,0 @@
-Flask
-Flask-SocketIO
-Flask-SQLAlchemy
-simple-websocket
-Flask-Cors
