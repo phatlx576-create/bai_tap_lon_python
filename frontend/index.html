@@ -65,6 +65,16 @@
       </div>
 
       <div class="section">
+        <h3>
+          <span>Nhóm</span>
+          <button type="button" id="new-group-btn" class="btn btn-small btn-primary">+ Tạo nhóm</button>
+        </h3>
+        <div id="groups-list" class="list">
+          <div class="empty-hint">Chưa có nhóm nào.</div>
+        </div>
+      </div>
+
+      <div class="section">
         <h3>Bạn bè</h3>
         <div id="friends-list" class="list">
           <div class="empty-hint">Chưa có bạn bè. Hãy tìm và kết bạn ở ô phía trên.</div>
@@ -76,7 +86,7 @@
     <main id="chat-main" class="chat-main">
       <div id="chat-empty" class="chat-empty">
         <div class="logo">💬</div>
-        <p>Chọn một người bạn để bắt đầu trò chuyện.</p>
+        <p>Chọn một người bạn hoặc một nhóm để bắt đầu trò chuyện.</p>
       </div>
 
       <div id="chat-panel" class="chat-panel hidden">
@@ -88,18 +98,74 @@
             <span id="chat-status" class="chat-status">Offline</span>
           </div>
           <div id="chat-fingerprint" class="fingerprint" title="Mã xác minh khóa. So sánh với bạn bè để chắc chắn không bị nghe lén."></div>
+          <button type="button" id="search-toggle" class="btn btn-small btn-ghost" title="Tìm kiếm trong cuộc trò chuyện">🔍</button>
+          <button type="button" id="group-info-btn" class="btn btn-small btn-ghost hidden" title="Thông tin nhóm">👥</button>
         </header>
+
+        <!-- Tìm kiếm tin nhắn -->
+        <div id="search-panel" class="search-panel hidden">
+          <div class="search-row">
+            <input id="msg-search-input" type="search" placeholder="Tìm tin nhắn, tên tệp, liên kết...">
+            <select id="msg-search-filter">
+              <option value="all">Tất cả</option>
+              <option value="links">Liên kết</option>
+              <option value="files">Ảnh và tệp</option>
+            </select>
+            <button type="button" id="msg-search-go" class="btn btn-small btn-primary">Tìm</button>
+            <button type="button" id="msg-search-close" class="btn btn-small btn-ghost">✕</button>
+          </div>
+          <div id="msg-search-status" class="search-status"></div>
+          <div id="msg-search-results" class="search-results"></div>
+        </div>
 
         <div id="messages" class="messages">
           <button type="button" id="load-more" class="btn btn-small btn-ghost hidden">Tải tin cũ hơn</button>
         </div>
 
         <form id="message-form" class="message-form" autocomplete="off">
+          <button type="button" id="attach-btn" class="btn btn-ghost attach-btn" title="Gửi ảnh hoặc tệp (mã hóa, tối đa 4 MB)">📎</button>
+          <input id="file-input" type="file" class="hidden">
           <input id="message-input" type="text" placeholder="Nhập tin nhắn (sẽ được mã hóa)..." maxlength="2000">
           <button id="send-btn" type="submit" class="btn btn-primary">Gửi</button>
         </form>
       </div>
     </main>
+  </div>
+
+  <!-- ========== HỘP THOẠI: TẠO NHÓM ========== -->
+  <div id="group-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Tạo nhóm mới</h2>
+        <button type="button" id="group-modal-close" class="btn btn-small btn-ghost">✕</button>
+      </div>
+      <label for="group-name">Tên nhóm</label>
+      <input id="group-name" type="text" maxlength="50" placeholder="vd: Nhóm bài tập lớn">
+      <label>Chọn thành viên (từ danh sách bạn bè)</label>
+      <div id="group-friend-list" class="check-list"></div>
+      <div id="group-modal-error" class="error hidden"></div>
+      <button type="button" id="group-create-btn" class="btn btn-primary modal-submit">Tạo nhóm</button>
+    </div>
+  </div>
+
+  <!-- ========== HỘP THOẠI: THÔNG TIN NHÓM ========== -->
+  <div id="group-info-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="group-info-title">Thông tin nhóm</h2>
+        <button type="button" id="group-info-close" class="btn btn-small btn-ghost">✕</button>
+      </div>
+      <h3 class="modal-sub">Thành viên</h3>
+      <div id="group-members" class="check-list"></div>
+      <div id="group-add-wrap" class="hidden">
+        <h3 class="modal-sub">Thêm thành viên</h3>
+        <div id="group-add-list" class="check-list"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="group-leave-btn" class="btn btn-danger">Rời nhóm</button>
+        <button type="button" id="group-delete-btn" class="btn btn-danger hidden">Xóa nhóm</button>
+      </div>
+    </div>
   </div>
 
   <div id="toast" class="toast"></div>

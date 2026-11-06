@@ -10,6 +10,7 @@ from libs.socket import socketio
 from routes.authRoute import auth_bp
 from routes.userRoute import user_bp
 from routes.friendRoute import friend_bp
+from routes.groupRoute import group_bp
 
 # Import để đăng ký các sự kiện socket (join, send_message, ...)
 import sockets.chatSocket  # noqa: F401
@@ -28,13 +29,21 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(user_bp, url_prefix="/api/users")
     app.register_blueprint(friend_bp, url_prefix="/api/friends")
+    app.register_blueprint(group_bp, url_prefix="/api/groups")
 
     # Phục vụ giao diện: mở http://localhost:5000
     @app.route("/")
     def index():
         return send_from_directory(FRONTEND_DIR, "index.html")
 
-    socketio.init_app(app, cors_allowed_origins="*", async_mode="threading")
+    # max_http_buffer_size: cho phép gửi tệp (đã mã hóa) tới ~10 MB mỗi gói
+    socketio.init_app(
+        app,
+        cors_allowed_origins="*",
+        async_mode="threading",
+        max_http_buffer_size=10_000_000,
+        ping_timeout=60,
+    )
     return app
 
 
@@ -44,6 +53,7 @@ if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 5000))
     print(f"Server chạy tại http://localhost:{port}")
-    # KHÔNG bật debug khi mở ra internet. Khi cần debug ở máy mình: đặt DEBUG=1
+    # KHÔNG bật debug khi mở ra internet (trình debug của Werkzeug cho phép chạy code từ xa).
+    # Khi cần debug ở máy mình: đặt biến môi trường DEBUG=1
     debug = os.environ.get("DEBUG") == "1"
     socketio.run(app, host="0.0.0.0", port=port, debug=debug, allow_unsafe_werkzeug=True)
